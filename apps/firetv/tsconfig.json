@@ -1,0 +1,25 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@alongside/shared/src/tv": [
+        "../../packages/shared/src/tv.ts"
+      ],
+      "@alongside/shared": [
+        "../../packages/shared/src/index.ts"
+      ]
+    },
+    "types": [
+      "react-native"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "index.js",
+    "App.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "android"
+  ]
+}

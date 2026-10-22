@@ -1,0 +1,27 @@
+{
+  "name": "alongside",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Alongside — a conversational daily companion that helps older adults living alone follow their own routines.",
+  "license": "Apache-2.0",
+  "workspaces": [
+    "packages/*",
+    "apps/server",
+    "apps/web"
+  ],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "npm run build -w @alongside/shared && npm run build -w @alongside/server && npm run build -w @alongside/web",
+    "dev": "concurrently -n server,web -c cyan,magenta \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "npm run dev -w @alongside/server",
+    "dev:web": "npm run dev -w @alongside/web",
+    "seed": "npm run seed -w @alongside/server",
+    "reset": "npm run reset -w @alongside/server",
+    "test": "npm run test -w @alongside/server",
+    "typecheck": "npm run typecheck -w @alongside/shared && npm run typecheck -w @alongside/server && npm run typecheck -w @alongside/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  }
+}

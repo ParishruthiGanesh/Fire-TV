@@ -1,0 +1,36 @@
+/*
+ * Optional Gradle init script: prefer the Google-hosted Maven Central mirror.
+ *
+ * Maven Central rate-limits by IP, and a shared or CI network can hit HTTP 429
+ * part-way through a cold React Native build. Running the build with
+ *
+ *     ./gradlew assembleRelease -I mirrors.init.gradle
+ *
+ * puts a different host in front of Maven Central for every project, including
+ * the React Native Gradle plugin's own included build, which is where a cold
+ * build usually stalls. It changes no versions and no artifacts — only where
+ * they are fetched from — so it is safe to use or to leave out.
+ */
+def mirrorUrl = 'https://maven-central.storage-download.googleapis.com/maven2'
+
+beforeSettings { settings ->
+  settings.pluginManagement {
+    repositories {
+      maven { url mirrorUrl; name 'mavenCentralMirror' }
+      google()
+      gradlePluginPortal()
+      mavenCentral()
+    }
+  }
+}
+
+allprojects {
+  buildscript {
+    repositories {
+      maven { url mirrorUrl; name 'mavenCentralMirror' }
+    }
+  }
+  repositories {
+    maven { url mirrorUrl; name 'mavenCentralMirror' }
+  }
+}

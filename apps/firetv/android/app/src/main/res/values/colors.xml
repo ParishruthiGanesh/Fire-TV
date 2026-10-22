@@ -1,0 +1,4 @@
+<resources>
+    <!-- Deep navy; matches the TV app's own background so startup is seamless. -->
+    <color name="alongside_background">#101D33</color>
+</resources>

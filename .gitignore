@@ -1,0 +1,23 @@
+node_modules/
+dist/
+build/
+*.log
+.env
+.env.local
+data/
+uploads/
+coverage/
+*.tsbuildinfo
+.DS_Store
+
+# Android / React Native
+apps/firetv/android/.gradle/
+apps/firetv/android/app/build/
+apps/firetv/android/build/
+apps/firetv/android/local.properties
+apps/firetv/android/captures/
+apps/firetv/android/.cxx/
+apps/firetv/*.keystore
+!apps/firetv/android/app/debug.keystore
+apps/firetv/.bundle/
+*.apk.idsig

@@ -1,0 +1,32 @@
+{
+  "name": "@alongside/firetv",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Alongside on Fire TV — the older adult's screen, built with React Native for Fire OS.",
+  "scripts": {
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "build:debug": "cd android && ./gradlew assembleDebug",
+    "build:release": "cd android && ./gradlew assembleRelease",
+    "install:firetv": "adb install -r android/app/build/outputs/apk/debug/app-debug.apk",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.1.0",
+    "react": "18.3.1",
+    "react-native": "0.76.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/runtime": "^7.25.0",
+    "@react-native-community/cli": "15.0.1",
+    "@react-native-community/cli-platform-android": "15.0.1",
+    "@react-native/babel-preset": "0.76.5",
+    "@react-native/metro-config": "0.76.5",
+    "@react-native/typescript-config": "0.76.5",
+    "@types/react": "^18.2.6",
+    "typescript": "5.0.4"
+  },
+  "engines": { "node": ">=18" }
+}

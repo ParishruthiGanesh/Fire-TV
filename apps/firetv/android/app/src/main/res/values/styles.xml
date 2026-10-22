@@ -1,0 +1,13 @@
+<resources>
+
+    <!--
+      Calm, warm-dark base theme so the first frame on a television does not
+      flash white in a dim room.
+    -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+        <item name="android:windowBackground">@color/alongside_background</item>
+        <item name="android:colorBackground">@color/alongside_background</item>
+    </style>
+
+</resources>
