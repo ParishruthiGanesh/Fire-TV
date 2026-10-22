@@ -128,18 +128,22 @@ export default function Dashboard() {
               <span className="muted tiny">Newest first</span>
             </div>
             <div className="feed">
-              {activity.slice(0, 18).map((event) => (
-                <div className="item" key={event.id}>
-                  <span className="at">{friendlyTime(localTimeInZone(event.createdAt, timezone))}</span>
-                  <span>
-                    {event.summary}
-                    <br />
-                    <span className="muted tiny">
-                      {event.surface === 'system' ? 'scheduled by Alongside' : `from the ${surfaceLabel(event.surface)}`}
+              {activity.slice(0, 18).map((event) => {
+                const day = localDateInZone(event.createdAt, timezone);
+                return (
+                  <div className="item" key={event.id}>
+                    <span className="at">{friendlyTime(localTimeInZone(event.createdAt, timezone))}</span>
+                    <span>
+                      {event.summary}
+                      <br />
+                      <span className="muted tiny">
+                        {day !== today ? `${dayLabel(day, today)} · ` : ''}
+                        {originLabel(event)}
+                      </span>
                     </span>
-                  </span>
-                </div>
-              ))}
+                  </div>
+                );
+              })}
               {activity.length === 0 && <p className="muted small">Nothing has happened yet today.</p>}
             </div>
           </section>
@@ -147,6 +151,20 @@ export default function Dashboard() {
       </div>
     </div>
   );
+}
+
+/** Where an activity entry came from, in words a caregiver would use. */
+function originLabel(event: ActivityEvent): string {
+  if (event.type.startsWith('ring_')) return 'from the doorbell simulator';
+  if (event.surface === 'system') return 'scheduled by Alongside';
+  return `from the ${surfaceLabel(event.surface)}`;
+}
+
+/** "yesterday", or the date, for anything not from today. */
+function dayLabel(day: string, today: string): string {
+  if (day === addLocalDays(today, -1)) return 'yesterday';
+  if (day === addLocalDays(today, 1)) return 'tomorrow';
+  return day;
 }
 
 function surfaceLabel(surface: string): string {

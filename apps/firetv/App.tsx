@@ -52,7 +52,10 @@ export default function App() {
   const [message, setMessage] = useState<string | null>(null);
   const [photoFirst, setPhotoFirst] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [helpSent, setHelpSent] = useState(false);
   const client = useRef<TvClient | null>(null);
+  const upcomingScroller = useRef<ScrollView>(null);
+  const upcomingOffset = useRef(0);
 
   // ------------------------------------------------------------- connection
 
@@ -123,6 +126,10 @@ export default function App() {
     if (!api || !snapshot) return [];
 
     if (screen === 'help') {
+      // Once the request is in, stop offering to send it again.
+      if (helpSent) {
+        return [{ label: 'Back to what I was doing', tone: 'primary', run: () => back() }];
+      }
       return [
         {
           label: 'Yes, ask for help',
@@ -130,6 +137,7 @@ export default function App() {
           run: () =>
             run(async () => {
               await api.requestHelp(occurrence?.id ?? null, 'I need a hand, please.');
+              setHelpSent(true);
               setMessage(
                 `${caregiverName(snapshot)} will see this on her dashboard. Nothing has been sent as a message or a call.`,
               );
@@ -207,6 +215,9 @@ export default function App() {
             run(async () => {
               setPhotoFirst(false);
               await api.command(occurrence.id, 'start');
+              // Move now rather than waiting for a state change that may not
+              // come: the occurrence can already be in progress.
+              go('steps');
             }),
         },
         {
@@ -216,6 +227,7 @@ export default function App() {
             run(async () => {
               setPhotoFirst(true);
               await api.command(occurrence.id, 'start');
+              go('steps');
             }),
         },
         {
@@ -232,12 +244,13 @@ export default function App() {
       { label: 'What is coming up', tone: 'primary', run: () => go('upcoming') },
       { label: 'I need help', run: () => go('help') },
     ];
-  }, [screen, occurrence, snapshot, run]);
+  }, [screen, occurrence, snapshot, run, helpSent]);
 
   const go = (next: ScreenName) => {
     setScreen(next);
     setFocus(0);
     setMessage(null);
+    if (next !== 'help') setHelpSent(false);
   };
 
   const back = useCallback(() => {
@@ -262,6 +275,12 @@ export default function App() {
 
   useRemote((key) => {
     if (!settings) return;
+    if (screen === 'upcoming' && (key === 'up' || key === 'down')) {
+      // The list is longer than one screen, so the pad scrolls it.
+      upcomingOffset.current = Math.max(0, upcomingOffset.current + (key === 'down' ? 120 : -120));
+      upcomingScroller.current?.scrollTo({ y: upcomingOffset.current, animated: true });
+      return;
+    }
     if (key === 'left' || key === 'up') setFocus((f) => (f - 1 + actions.length) % Math.max(actions.length, 1));
     else if (key === 'right' || key === 'down') setFocus((f) => (f + 1) % Math.max(actions.length, 1));
     else if (key === 'select') actions[focus]?.run();
@@ -323,7 +342,12 @@ export default function App() {
               {connection.status === 'offline' ? 'Not connected to the household' : 'Getting today ready…'}
             </Text>
           ) : screen === 'upcoming' ? (
-            <Upcoming snapshot={snapshot} textScale={textScale} timezone={timezone} />
+            <Upcoming
+              snapshot={snapshot}
+              textScale={textScale}
+              timezone={timezone}
+              scrollRef={upcomingScroller}
+            />
           ) : screen === 'help' ? (
             <Simple
               title="Would you like me to ask for help?"
@@ -438,10 +462,12 @@ function Upcoming({
   snapshot,
   textScale,
   timezone,
+  scrollRef,
 }: {
   snapshot: HouseholdSnapshot;
   textScale: number;
   timezone: string;
+  scrollRef: React.RefObject<ScrollView>;
 }) {
   const today = localDateInZone(snapshot.now, timezone);
   return (
@@ -449,8 +475,8 @@ function Upcoming({
       <Text style={[styles.title, { fontSize: scaled(theme.text.title, textScale), marginBottom: 12 }]}>
         Coming up
       </Text>
-      <ScrollView>
-        {snapshot.occurrences.slice(0, 8).map((occurrence) => (
+      <ScrollView ref={scrollRef}>
+        {snapshot.occurrences.map((occurrence) => (
           <View key={occurrence.id} style={styles.upcomingRow}>
             <Text style={[styles.upcomingTime, { fontSize: scaled(theme.text.body, textScale) }]}>
               {friendlyTime(localTimeInZone(occurrence.dueAt, timezone))}
