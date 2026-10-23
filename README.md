@@ -47,11 +47,9 @@ cd Fire-TV
 cp .env.example .env          # no secrets needed for the default demo
 npm install
 
-# create the demo household (Mary, Anna, two published routines)
-npm run seed -w @alongside/server
-
-# backend on :4000 and the web app on :5173
-npm run dev
+# seeds the demo household if needed, starts everything, and prints the
+# pairing code and every URL you need
+./scripts/demo.sh
 ```
 
 Then open:
@@ -153,6 +151,7 @@ docs                architecture, integrations, Fire TV setup, demo script, feed
 
 ## Documentation
 
+- [docs/LAPTOP_DEMO.md](docs/LAPTOP_DEMO.md) — run all three surfaces on one laptop, with no Fire TV hardware
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — data model, state machine, synchronisation
 - [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) — real vs simulated, and the exact remaining dependencies
 - [docs/FIRETV.md](docs/FIRETV.md) — building, installing and running on Fire OS or an emulator
