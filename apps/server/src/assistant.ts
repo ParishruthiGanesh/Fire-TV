@@ -25,6 +25,8 @@ export interface TurnRequest {
   occurrenceId: string | null;
   surface: Extract<Surface, 'voice' | 'tv' | 'mcp'>;
   idempotencyKey?: string;
+  /** The person picked this from a list on screen; no interpretation needed. */
+  declaredIntent?: AssistantIntent;
 }
 
 /**
@@ -84,12 +86,20 @@ export class Assistant {
 
     this.recordTurn(householdId, request.surface, occurrence?.id ?? null, 'person', request.text, null);
 
-    const understanding = await this.ai.understandTurn({
-      preferredName: profile.preferredName,
-      occurrence,
-      history,
-      message: request.text,
-    });
+    const understanding = request.declaredIntent
+      ? {
+          intent: request.declaredIntent,
+          postponeMinutes: null,
+          situation: request.text,
+          question: null,
+          confidence: 1,
+        }
+      : await this.ai.understandTurn({
+          preferredName: profile.preferredName,
+          occurrence,
+          history,
+          message: request.text,
+        });
 
     let intent = understanding.intent;
     const pending = session.pendingOffer;

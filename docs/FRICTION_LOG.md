@@ -74,16 +74,30 @@ container; attempted to start an emulator.
 
 **Expected.** Slow, but possible.
 
-**Actual.** Impossible. The Android emulator requires hardware acceleration (`/dev/kvm` on
-Linux), which cloud containers generally do not expose. Modern x86 system images will not
-start without it, and ARM images for recent API levels are not published for x86 Linux hosts.
+**Actual.** Not impossible, but undocumented and easy to give up on. The host CPU exposed no
+virtualization extensions at all (no `vmx`/`svm` in `/proc/cpuinfo`), so `/dev/kvm` does not
+exist and every "just enable KVM" answer is a dead end.
 
-**Workaround.** Verified everything verifiable without running the app: the release APK
-builds with the JS bundle embedded, `aapt2 dump badging` confirms the leanback launcher and
-the not-required features, the backend contract the app depends on is covered by automated
-tests including the WebSocket transport, and a browser mirror of the television renders the
-same state. The on-device visual and input pass is written out as a checklist in our docs so
-whoever has a device can complete it in two minutes.
+**Workaround.** Two dead ends and one that worked.
+
+- An **ARM64** Android TV image under software emulation is refused outright:
+  *"Avd's CPU Architecture 'arm64' is not supported by the QEMU2 emulator on x86_64 host."*
+  Cross-architecture emulation is simply gone.
+- An **x86_64** Android TV image with `-accel off` **does** boot under QEMU's software
+  emulation — in about ten minutes, which is tedious but entirely workable. That is the
+  escape hatch, and it is not documented anywhere we could find.
+
+With that running we drove the whole app through `adb shell input keyevent`, which delivers
+genuine D-pad and select events, and it found five defects that the build, the tests and the
+browser mirror had all missed.
+
+**Suggestion.** Two things would each have saved hours. First, say in the emulator docs that
+an architecture-matched image with `-accel off` is a supported fallback when KVM is
+unavailable — the current failure mode is an arch error that reads like "you cannot do this
+at all". Second, and more valuable for this track: a browser-hosted Fire TV simulator. We
+later found Amazon's **Live Device Interaction** virtual device farm, which is exactly that
+and is excellent — it is just not mentioned anywhere in the Fire TV getting-started path a
+new developer follows.
 
 **Suggestion.** This is the highest-value gap for the Fire TV track. A browser-hosted Fire TV
 simulator (even screenshot-only), or a documented way to get a remote device session for a

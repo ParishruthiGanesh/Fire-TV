@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { BackHandler, Keyboard, StyleSheet, Text, TextInput, View } from 'react-native';
 import { theme, scaled } from '../theme';
 import { TvButton, TvButtonRow } from '../components/TvButton';
 import { useRemote, setRemoteCapture } from '../remote';
@@ -19,7 +19,9 @@ export default function Setup({
   onPaired: (baseUrl: string, token: string, householdName: string) => void;
   initialBaseUrl: string;
 }) {
-  const [baseUrl, setBaseUrl] = useState(initialBaseUrl || 'http://192.168.1.10:4000');
+  // Deliberately empty rather than pre-filled: editing a 24-character default
+  // with a remote control is far worse than typing a short address once.
+  const [baseUrl, setBaseUrl] = useState(initialBaseUrl);
   const [code, setCode] = useState('');
   const [editing, setEditing] = useState<null | 'url' | 'code'>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -29,7 +31,7 @@ export default function Setup({
   const codeRef = useRef<TextInput>(null);
 
   const actions = [
-    { label: 'Server address', hint: baseUrl || 'not set', run: () => openField('url') },
+    { label: 'Server address', hint: baseUrl || 'not set yet', run: () => openField('url') },
     { label: 'Pairing code', hint: code || 'six characters', run: () => openField('code') },
     { label: 'Connect', hint: 'start using Alongside', run: () => connect() },
   ];
@@ -40,10 +42,37 @@ export default function Setup({
     setTimeout(() => (field === 'url' ? urlRef.current : codeRef.current)?.focus(), 60);
   };
 
-  const closeField = () => {
+  /**
+   * Hand the remote back to the screen.
+   *
+   * Blurring explicitly matters: dismissing the on-screen keyboard does not by
+   * itself release the text field, and a field that still holds Android's
+   * focus swallows the directional pad — which leaves someone stuck on this
+   * screen with a remote that appears to have stopped working.
+   */
+  const closeField = useCallback(() => {
+    urlRef.current?.blur();
+    codeRef.current?.blur();
     setEditing(null);
     setRemoteCapture(true);
-  };
+  }, []);
+
+  // The keyboard closing is the signal that editing is over, however it was
+  // dismissed — Back, the keyboard's own tick, or finishing the line.
+  useEffect(() => {
+    const hidden = Keyboard.addListener('keyboardDidHide', closeField);
+    return () => hidden.remove();
+  }, [closeField]);
+
+  // While a field is open, Back closes it rather than leaving the app.
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!editing) return false;
+      closeField();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [editing, closeField]);
 
   useEffect(() => () => setRemoteCapture(true), []);
 
@@ -94,6 +123,7 @@ export default function Setup({
             onChangeText={setBaseUrl}
             onBlur={closeField}
             onSubmitEditing={closeField}
+            selectTextOnFocus
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="url"
@@ -110,6 +140,7 @@ export default function Setup({
             onChangeText={(value) => setCode(value.toUpperCase())}
             onBlur={closeField}
             onSubmitEditing={closeField}
+            selectTextOnFocus
             autoCapitalize="characters"
             autoCorrect={false}
             maxLength={8}
@@ -136,7 +167,8 @@ export default function Setup({
       </TvButtonRow>
       {busy ? <Text style={styles.status}>Working…</Text> : null}
       <Text style={styles.footnote}>
-        Use the directional pad to move, the centre button to choose, and Back to close the keyboard.
+        Use the directional pad to move and the centre button to choose. While the keyboard is open it takes over
+        the pad — press Back to close it and carry on.
       </Text>
     </View>
   );

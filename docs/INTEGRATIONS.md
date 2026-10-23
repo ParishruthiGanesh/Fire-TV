@@ -23,12 +23,13 @@ says why, and it says exactly what would be needed to make it real.
   which uses the television's own on-screen keyboard (and hands key handling back to Android
   while it is open).
 
-**Verified:** the release APK builds from a clean checkout in this environment, with the JS
-bundle embedded (`assembleRelease`). **Not verified:** running on physical Fire TV hardware
-or in the Fire TV emulator — the build environment used here has no `/dev/kvm`, so no Android
-emulator can start in it, and no Fire TV device was available. The remaining step is
-`adb install` and a visual pass; see [FIRETV.md](FIRETV.md), which lists exactly what to
-check.
+**Verified:** the release APK builds from a clean checkout with the JS bundle embedded, and
+the app has been run end to end on an **Android TV emulator** — setup, pairing, the live
+snapshot, D-pad navigation, confirming steps, the approved alternative, and a help request
+reaching the dashboard — driven by real key events over `adb`. **Not verified:** physical
+Fire TV hardware. See [TESTING.md](TESTING.md) for what the emulator pass covered and the
+five defects it caught, and [FIRETV.md](FIRETV.md) for the short device-specific checklist
+that remains.
 
 **Vega OS** was considered and not used: the Vega SDK requires a developer account with
 access granted by Amazon, which we do not have. The React Native code here is the closest

@@ -56,7 +56,7 @@ export function Caption({ text, textScale }: { text: string | null; textScale: n
   return (
     <View style={styles.caption}>
       <Text style={[styles.captionLabel, { fontSize: scaled(theme.text.small, textScale) }]}>Alongside said</Text>
-      <Text style={[styles.captionText, { fontSize: scaled(theme.text.label, textScale) }]} numberOfLines={3}>
+      <Text style={[styles.captionText, { fontSize: scaled(theme.text.label, textScale) }]} numberOfLines={2}>
         {text}
       </Text>
     </View>
@@ -83,6 +83,7 @@ export function StepDots({ total, current, confirmed }: { total: number; current
 
 const styles = StyleSheet.create({
   header: {
+    flexShrink: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -101,6 +102,7 @@ const styles = StyleSheet.create({
   offlinePill: { backgroundColor: theme.colour.rose },
   demoText: { color: theme.colour.amberText, fontWeight: '700' },
   caption: {
+    flexShrink: 0,
     backgroundColor: 'rgba(255,255,255,0.07)',
     borderRadius: theme.size.radius,
     paddingHorizontal: 18,

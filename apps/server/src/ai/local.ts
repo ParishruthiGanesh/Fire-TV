@@ -552,6 +552,9 @@ export function classifyUtterance(message: string): TurnUnderstanding {
   if (
     has(/\b(isn'?t there|is not there|not there|can'?t find|cannot find|missing|gone|empty|wrong (photo|picture|one)|isn'?t the photo|is not the photo|different|not what|doesn'?t look|something(?:'s| is)? (?:wrong|different)|out of)\b/)
     || has(/\b(strange|odd|weird|funny|not working|isn'?t working|doesn'?t work|won'?t (?:work|turn|open|close|start|go)|broken|spilled|spilt|ran out|run out|too cold|too hot)\b/)
+    // "it is not in the fridge", "they aren't on the shelf" — a location that
+    // does not hold what it should is the commonest form of this report.
+    || has(/\b(is|are|was|were)? ?(not|n'?t) (in|on|under|next to|by|at|near) (the|my|her|his|their)\b/)
   ) {
     return und('something_different', { situation: message.trim(), confidence: 0.8 });
   }

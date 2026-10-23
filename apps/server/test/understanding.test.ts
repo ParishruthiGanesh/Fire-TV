@@ -257,3 +257,39 @@ describe('household timezone handling', () => {
     expect(dates).toContain(addLocalDays(dates[0], 1));
   });
 });
+
+describe('a choice made on screen is not speech', () => {
+  it('takes a declared intent at face value instead of re-interpreting it', async () => {
+    h = createHarness();
+    const { routine } = publishRoutine(h);
+    setClock(h, '08:05');
+    const occurrence = todaysOccurrence(h, routine.id);
+    const approved = routine.alternatives[0];
+
+    // The television sends the caregiver's own wording for the situation the
+    // person picked from a list. Put through speech classification it reads as
+    // unclear; declared, it reaches the approved answer.
+    expect(classifyUtterance(approved.situation).intent).not.toBe('request_help');
+
+    const result = await h.assistant.turn(h.householdId, {
+      text: approved.situation,
+      occurrenceId: occurrence.id,
+      surface: 'tv',
+      declaredIntent: 'something_different',
+    });
+
+    expect(result.intent).toBe('something_different');
+    expect(result.provenance).toBe('caregiver_approved');
+    expect(result.reply).toMatch(/pantry/i);
+  });
+
+  it('recognises a place that does not hold what it should', () => {
+    for (const utterance of [
+      'the yellow container is not in the fridge',
+      "it isn't on the shelf",
+      "they aren't in the cupboard",
+    ]) {
+      expect(classifyUtterance(utterance).intent).toBe('something_different');
+    }
+  });
+});

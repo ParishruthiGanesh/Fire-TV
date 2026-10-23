@@ -6,7 +6,7 @@
 npm test          # or: npx vitest run -w @alongside/server
 ```
 
-**73 tests across 6 files**, all passing on the last run. They use an on-disk SQLite file per
+**75 tests across 6 files**, all passing on the last run. They use an on-disk SQLite file per
 test, so "close the app and reopen it" is a real reopen of a real database rather than a
 mock.
 
@@ -49,15 +49,44 @@ Running the recorded demo and running the test exercise the same code paths.
   present, so it runs without a development server.
 - **TypeScript across all four packages**, and the production build of the backend and web
   app.
+- **The Fire TV app running on an Android TV emulator** (API 36, 1920×1080, x86_64), driven
+  entirely through `adb shell input keyevent` — that is, real D-pad and select key events,
+  not synthetic taps. Exercised: first-run setup and pairing; the home screen rendering the
+  live snapshot with the caregiver's photo; Start; "Done, what is next" confirming a step
+  and advancing; the progress dots and step counter; "Something is different" returning the
+  caregiver-approved alternative; a help request reaching the dashboard with the right
+  activity and step attached; the demo-clock announcement arriving over the WebSocket; and
+  Back behaving as it should. Four defects were found this way and fixed — see below.
+
+### What running it on a television actually caught
+
+None of these would have been found by a test or by reading the code. They are the argument
+for doing this pass rather than trusting a green build.
+
+1. **The setup screen trapped you.** Dismissing the on-screen keyboard left the text field
+   holding Android's focus, so the directional pad stopped moving the highlight and the
+   remote appeared to have died. Fixed by blurring explicitly, closing the field when the
+   keyboard hides, and handling Back while editing.
+2. **The server address was pre-filled**, which meant deleting 24 characters with a remote
+   before you could type your own. Now empty, with the placeholder doing the work.
+3. **The step screen overflowed and drew over itself** — the caption band landed on top of
+   the instruction text. React Native defaults `flexShrink` to `0`, unlike the web, so an
+   over-tall row overflows instead of giving way. Fixed across the vertical stack.
+4. **Choosing a listed situation was re-interpreted as speech.** The television sends the
+   caregiver's own wording for the alternative the person picked; run back through speech
+   classification it came out as "Sorry, I didn't quite catch that" — the one place the
+   product must not fumble. A choice made on screen now carries a declared intent, and the
+   speech classifier also learned the "it is not in the fridge" shape.
+5. **The help confirmation never appeared**, because the shared action helper cleared the
+   message *after* the action had set it. The person was told nothing after asking for help.
 
 ## Not verified
 
-- **The Fire TV app running on a device or an emulator.** The build environment has no
-  `/dev/kvm`, so no Android emulator can start in it, and no Fire TV hardware was attached.
-  The APK builds and its manifest is correct; the on-device visual and input pass is listed
-  as a checklist in [FIRETV.md](FIRETV.md). The backend contract the app depends on is
-  covered by `tv-transport.test.ts` and `demo-flow.test.ts`, and the `/tv` mirror renders
-  the same state, but neither is the same as watching it on a television.
+- **Physical Fire TV hardware.** The emulator pass above covers layout, focus, D-pad input
+  and the whole backend contract, but it is an Android TV image rather than Fire OS, and no
+  Fire TV device was attached. What remains device-specific: the app's appearance on the
+  Fire TV home row with its banner, a physical remote's key mapping, and real-network
+  behaviour. [FIRETV.md](FIRETV.md) has that as a short checklist.
 - **The hosted AI providers.** The Anthropic and Bedrock adapters are written against the
   documented APIs and parse into the same schemas, but no API key or Bedrock model access
   was available here, so neither has been run against a live endpoint. The deterministic

@@ -224,12 +224,14 @@ with the JavaScript bundle embedded, the leanback launcher category, the home-sc
 and `touchscreen`/`leanback` both declared not-required — all confirmed by inspecting the
 built APK with `aapt2 dump badging`.
 
-The app has **not** been launched on physical Fire TV hardware or in an emulator from this
-environment: the build machine has no `/dev/kvm`, so no Android emulator can start in it, and
-no Fire TV device was attached. The backend contract the app depends on — pairing, snapshot,
-WebSocket events, and every command the remote sends — **is** covered by automated tests
-(`apps/server/test/tv-transport.test.ts` and `demo-flow.test.ts`), and the browser mirror at
-`/tv` renders the same state from the same backend. What remains unverified is the on-device
-visual and input pass listed above.
+The app **has** been run end to end on an **Android TV emulator** (API 36, 1920×1080,
+x86_64), driven through real D-pad and select key events over `adb`: setup and pairing, the
+home screen, starting a routine, confirming steps, the approved alternative, a help request
+arriving on the dashboard, and the demo-clock announcement coming in over the WebSocket.
+That pass found and fixed five defects — they are listed in [TESTING.md](TESTING.md).
+
+It has **not** been run on physical Fire TV hardware. An Android TV image is not Fire OS, so
+what remains device-specific is the checklist above: the home-row banner, a physical
+remote's key mapping, and behaviour on a real network.
 
 See [TESTING.md](TESTING.md) for the full list of what was and was not verified.

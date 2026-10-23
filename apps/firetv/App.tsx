@@ -108,18 +108,22 @@ export default function App() {
 
   // ---------------------------------------------------------------- actions
 
-  const run = useCallback(
-    async (work: () => Promise<unknown>, note?: string) => {
-      try {
-        if (note) setMessage(note);
-        await work();
-        setMessage(null);
-      } catch (error: any) {
-        setMessage(error?.message ?? 'That did not go through. Please try again.');
-      }
-    },
-    [],
-  );
+  /**
+   * Run an action and surface any failure in words.
+   *
+   * The message is cleared before the work, not after: an action that has
+   * something to say when it succeeds — "your family will see this" — sets it
+   * itself, and clearing afterwards would wipe the very thing the person
+   * needed to read.
+   */
+  const run = useCallback(async (work: () => Promise<unknown>) => {
+    setMessage(null);
+    try {
+      await work();
+    } catch (error: any) {
+      setMessage(error?.message ?? 'That did not go through. Please try again.');
+    }
+  }, []);
 
   const actions: Action[] = useMemo(() => {
     const api = client.current;
@@ -155,7 +159,7 @@ export default function App() {
           hint: 'tell Alongside',
           run: () =>
             run(async () => {
-              const reply = await api.say(alternative.situation, occurrence?.id ?? null);
+              const reply = await api.say(alternative.situation, occurrence?.id ?? null, 'something_different');
               setMessage(reply.reply);
             }),
         })),
@@ -163,7 +167,11 @@ export default function App() {
           label: 'Something else',
           run: () =>
             run(async () => {
-              const reply = await api.say('Something is different and I am not sure what to do', occurrence?.id ?? null);
+              const reply = await api.say(
+                'Something is different and I am not sure what to do',
+                occurrence?.id ?? null,
+                'something_different',
+              );
               setMessage(reply.reply);
             }),
         },
@@ -443,7 +451,7 @@ function Activity({
           {occurrence.routine.title}
         </Text>
         {showSteps ? <StepDots total={total} current={occurrence.currentStepIndex} confirmed={occurrence.confirmedStepIndex} /> : null}
-        <Text style={[styles.instruction, { fontSize: scaled(theme.text.body, textScale) }]} numberOfLines={5}>
+        <Text style={[styles.instruction, { fontSize: scaled(theme.text.body, textScale) }]} numberOfLines={4}>
           {showSteps && step
             ? step.body
             : occurrence.routine.greeting ?? `It's time for ${occurrence.routine.title.toLowerCase()}.`}
@@ -517,17 +525,18 @@ function shorten(text: string): string {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: theme.colour.background },
   page: { flex: 1, paddingHorizontal: theme.size.safe, paddingVertical: theme.size.safe * 0.7 },
-  body: { flex: 1, justifyContent: 'center' },
-  activity: { flexDirection: 'row', alignItems: 'center' },
+  body: { flex: 1, flexShrink: 1, minHeight: 0, justifyContent: 'center' },
+  activity: { flexDirection: 'row', alignItems: 'center', flexShrink: 1 },
   photo: {
-    width: 360,
-    height: 202,
+    width: 300,
+    height: 169,
     borderRadius: theme.size.radius,
-    marginRight: 28,
+    marginRight: 24,
+    flexShrink: 1,
     backgroundColor: theme.colour.panel,
   },
-  photoLarge: { width: 440, height: 248 },
-  activityText: { flex: 1 },
+  photoLarge: { width: 400, height: 225 },
+  activityText: { flex: 1, flexShrink: 1 },
   eyebrow: { color: theme.colour.teal, letterSpacing: 1.6, textTransform: 'uppercase', marginBottom: 6 },
   title: { color: theme.colour.text, fontWeight: '700' },
   instruction: { color: theme.colour.text, lineHeight: 40, marginTop: 8 },

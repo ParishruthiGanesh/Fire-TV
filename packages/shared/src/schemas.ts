@@ -142,6 +142,13 @@ export const assistantTurnRequestSchema = z.object({
   occurrenceId: z.string().nullable().default(null),
   surface: z.enum(['voice', 'tv', 'mcp']).default('voice'),
   idempotencyKey: z.string().min(6).max(120).optional(),
+  /**
+   * Set when the person chose from a list on screen rather than spoke.
+   * A button press already carries its meaning, so the server takes it at face
+   * value instead of putting the caregiver's own wording back through speech
+   * classification — which is how an approved phrase ends up "not understood".
+   */
+  declaredIntent: assistantIntentSchema.optional(),
 });
 
 export const demoClockRequestSchema = z.object({

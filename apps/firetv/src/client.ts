@@ -204,11 +204,23 @@ export class TvClient {
     });
   }
 
-  say(text: string, occurrenceId: string | null): Promise<{ reply: string; provenance: string }> {
+  /**
+   * Tell the assistant what the person chose.
+   *
+   * `declaredIntent` is set when they picked a listed option rather than said
+   * something, so the caregiver's own wording is not put through speech
+   * classification on its way back to them.
+   */
+  say(
+    text: string,
+    occurrenceId: string | null,
+    declaredIntent?: 'something_different',
+  ): Promise<{ reply: string; provenance: string }> {
     return this.post('/api/assistant/turn', {
       text,
       occurrenceId,
       surface: 'tv',
+      declaredIntent,
       idempotencyKey: key(`say-${text.slice(0, 24)}`, occurrenceId ?? 'none'),
     });
   }
