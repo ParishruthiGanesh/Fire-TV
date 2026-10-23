@@ -21,3 +21,7 @@ apps/firetv/*.keystore
 !apps/firetv/android/app/debug.keystore
 apps/firetv/.bundle/
 *.apk.idsig
+
+# Demo video working files — recordings and renders are large and regenerable
+scripts/video/build/
+scripts/video/node_modules

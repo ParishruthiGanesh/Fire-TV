@@ -1,0 +1,80 @@
+{
+  "voice": "en_GB-alba-medium",
+  "scenes": [
+    {
+      "id": "01-title",
+      "source": "card:Alongside|A conversational daily companion",
+      "text": "Mary is eighty-one and lives alone. Her daughter Anna has explained the morning a hundred times. Alongside is for the hundred and first."
+    },
+    {
+      "id": "02-dashboard",
+      "source": "web:02-dashboard",
+      "text": "Anna's side is a website. Mary's routines, what she has reported, and anything asking for attention."
+    },
+    {
+      "id": "03-describe",
+      "source": "web:03-describe",
+      "text": "Anna describes breakfast the way she would say it to a neighbour, and attaches the photo that makes it obvious which container she means."
+    },
+    {
+      "id": "04-asks",
+      "source": "web:04-asks",
+      "text": "It does not invent the steps. It asks for them."
+    },
+    {
+      "id": "05-steps",
+      "source": "web:05-steps",
+      "text": "She gives them, including what to say if the container is not there. That becomes an approved alternative: the only answer the assistant is allowed to offer."
+    },
+    {
+      "id": "06-publish",
+      "source": "web:06-publish",
+      "text": "She changes the time by saying so. Then she reviews exactly what the assistant will say and what the television will show, and publishes. Nothing runs until she does."
+    },
+    {
+      "id": "07-tv-due",
+      "source": "tv:07-due",
+      "text": "Next morning, on the television. Breakfast, the photo Anna attached, and one instruction at a time."
+    },
+    {
+      "id": "08-voice-ask",
+      "source": "voice:08-ask",
+      "text": "Mary asks what she is having. The voice client and the television show the same approved answer, because they read the same backend."
+    },
+    {
+      "id": "09-postpone",
+      "source": "voice:09-postpone",
+      "text": "She asks for fifteen minutes. This morning moves. The recurring routine does not."
+    },
+    {
+      "id": "10-tv-resume",
+      "source": "tv:10-resume",
+      "text": "She comes back, and Alongside picks up at the step she actually confirmed. Showing a step was never the same as finishing it."
+    },
+    {
+      "id": "11-different",
+      "source": "tv:11-different",
+      "text": "The container is not there. That is Anna's own sentence, approved in advance. When Alongside does not know, it says so rather than guessing."
+    },
+    {
+      "id": "12-help",
+      "source": "voice:12-help",
+      "text": "Mary asks for help."
+    },
+    {
+      "id": "12b-help-seen",
+      "source": "web:12-help",
+      "text": "It is on Anna's dashboard immediately, with the activity and the step attached. It does not claim to have sent a message it never sent."
+    },
+    {
+      "id": "13-complete",
+      "source": "web:13-final",
+      "text": "Later she says she has eaten. Every screen agrees on the same final state."
+    },
+    {
+      "id": "14-close",
+      "source": "card:Tell it once. Review it.|Help my family member through their day.",
+      "text": "One backend. Three surfaces that cannot disagree. Alongside."
+    }
+  ]
+}
